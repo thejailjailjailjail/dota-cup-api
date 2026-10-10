@@ -1,0 +1,27 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "deno run --watch --env-file=.env -A src/main.ts",
+    "start": "deno run --allow-net --allow-env --allow-read src/main.ts",
+    "test": "deno test -A",
+    "check": "deno fmt --check && deno lint && deno check src/ && deno test -A",
+    "db:generate": "deno run -A npm:prisma generate",
+    "db:migrate": "deno run -A --env-file=.env npm:prisma migrate dev",
+    "db:deploy": "deno run -A npm:prisma migrate deploy"
+  },
+  "imports": {
+    "hono": "npm:hono@^4",
+    "@hono/zod-openapi": "npm:@hono/zod-openapi",
+    "zod": "npm:zod",
+    "@prisma/client": "npm:@prisma/client@^7",
+    "@prisma/adapter-pg": "npm:@prisma/adapter-pg@^7",
+    "prisma": "npm:prisma@^7",
+    "@std/assert": "jsr:@std/assert"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "allowScripts": ["npm:@prisma/engines@7.10.0", "npm:prisma@7.10.0"]
+}
