@@ -1,21 +1,181 @@
 // use prisma-8
 
+// -=-=- MODELS -=-=-
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+  id          String  @id @onCreate(cuid(2))
+  discordId   String  @unique
+  username    String
+  displayName String?
+  avatarUrl   String?
+
+  steamId         String?   @unique
+  steamName       String?
+  steamAvatarUrl  String?
+  steamProfileUrl String?
+  rankTier        Int?
+  rankCheckedAt   DateTime?
+
+  staff       StaffMember?
+  memberships TeamMember[]
+
+  createdAt DateTime @onCreate(now())
+  updatedAt DateTime @onCreate(now()) @onUpdate(now())
+
+  @@map("users")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+model StaffMember {
+  userId String    @id
+  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   StaffRole
+
+  createdAt DateTime @onCreate(now())
+
+  @@map("staff_members")
+}
+
+model Tournament {
+  id             String           @id @onCreate(cuid(2))
+  slug           String           @unique
+  name           String
+  status         TournamentStatus @default(DRAFT)
+  rosterDeadline DateTime?
+  rankLimit      Int?
+
+  teams   Team[]
+  invites Invite[]
+
+  createdAt DateTime @onCreate(now())
+
+  @@map("tournaments")
+}
+
+model Community {
+  id        String  @id @onCreate(cuid(2))
+  guildId   String  @unique
+  name      String
+  iconUrl   String?
+  inviteUrl String?
+
+  teams Team[]
+
+  createdAt DateTime @onCreate(now())
+
+  @@map("communities")
+}
+
+model Team {
+  id   String @id @onCreate(cuid(2))
+  name String
+  slug String
+  tag  String
+  seed Int?
+
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Restrict)
+  communityId  String
+  community    Community  @relation(fields: [communityId], references: [id], onDelete: Restrict)
+
+  members TeamMember[]
+  invites Invite[]
+
+  createdAt DateTime @onCreate(now())
+
+  @@unique([id, tournamentId])
+  @@unique([tournamentId, communityId])
+  @@unique([tournamentId, slug])
+  @@unique([tournamentId, seed])
+  @@map("teams")
+}
+
+model TeamMember {
+  id           String @id @onCreate(cuid(2))
+  teamId       String
+  tournamentId String
+  team         Team   @relation(fields: [teamId, tournamentId], references: [id, tournamentId], onDelete: Cascade)
+  userId       String
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lineup    Lineup       @default(NONE)
+  position  Int?
+  isCaptain Boolean      @default(false)
+  isManager Boolean      @default(false)
+  status    MemberStatus @default(PENDING)
+
+  createdAt DateTime @onCreate(now())
+
+  @@unique([tournamentId, userId])
+  @@index([teamId])
+  @@map("team_members")
+}
+
+model Invite {
+  id           String      @id @onCreate(cuid(2))
+  kind         InviteKind
+  tokenHash    String      @unique
+  tournamentId String?
+  tournament   Tournament? @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamId       String?
+  team         Team?       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdById  String
+  expiresAt    DateTime
+  maxUses      Int?
+  uses         Int         @default(0)
+  revokedAt    DateTime?
+
+  createdAt DateTime @onCreate(now())
+
+  @@map("invites")
+}
+
+model Match {
+  id     String      @id
+  scoreA Int?
+  scoreB Int?
+  status MatchStatus @default(UPCOMING)
+
+  tournamentId String?
+  tournament   Tournament? @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  startsdAt DateTime?
+  updatedAt DateTime  @onCreate(now()) @onUpdate(now())
+}
+
+// -=-=- ENUMS -=-=-
+
+enum StaffRole {
+  OWNER
+  ORGANIZER
+}
+
+enum TournamentStatus {
+  DRAFT
+  REGISTRATION
+  LOCKED
+  LIVE
+  FINISHED
+}
+
+enum Lineup {
+  PLAYER
+  COACH
+  NONE
+}
+
+enum MemberStatus {
+  PENDING
+  ACTIVE
+}
+
+enum InviteKind {
+  STAFF
+  COMMUNITY
+  TEAM
+}
+
+enum MatchStatus {
+  UPCOMING
+  LIVE
+  FINISHED
 }
