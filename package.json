@@ -1,4 +1,27 @@
 {
   "name": "dota-cup-api",
+  "author": {
+    "name": "Nazar",
+    "email": "watafak@lightbook.tech",
+    "url": "https://github.com/thejailjailjailjailh"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "format": "prettier --write .",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.3",
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@u3u/prettier-config": "^5.2.3",
+    "prettier": "3.9.10",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2"
+  },
   "packageManager": "yarn@4.18.1"
 }
