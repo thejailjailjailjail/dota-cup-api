@@ -1,0 +1,1987 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.communities",
+    "label": "Create table \"communities\"",
+    "summary": "Creates table \"communities\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "communities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"communities\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"communities\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"communities\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"communities\"",
+        "sql": "CREATE TABLE \"public\".\"communities\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"guildId\" text NOT NULL,\n  \"iconUrl\" text,\n  \"id\" text NOT NULL,\n  \"inviteUrl\" text,\n  \"name\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"communities\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"communities\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"communities\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.invites",
+    "label": "Create table \"invites\"",
+    "summary": "Creates table \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"invites\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"invites\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"invites\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"invites\"",
+        "sql": "CREATE TABLE \"public\".\"invites\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"createdById\" text NOT NULL,\n  \"expiresAt\" timestamptz NOT NULL,\n  \"guildId\" text,\n  \"id\" text NOT NULL,\n  \"kind\" text NOT NULL,\n  \"maxUses\" int4,\n  \"revokedAt\" timestamptz,\n  \"staffRole\" text,\n  \"teamId\" text,\n  \"tokenHash\" text NOT NULL,\n  \"tournamentId\" text,\n  \"usedAt\" timestamptz,\n  \"usedById\" text,\n  \"uses\" int4 DEFAULT 0 NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"invites_kind_check_a9ed639c\" CHECK (\"kind\" IN ('STAFF', 'COMMUNITY', 'TEAM')),\n  CONSTRAINT \"invites_staffRole_check_0b11325e\" CHECK (\"staffRole\" IN ('OWNER', 'ORGANIZER'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"invites\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"invites\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"invites\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.matches",
+    "label": "Create table \"matches\"",
+    "summary": "Creates table \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"matches\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"matches\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"matches\"",
+        "sql": "CREATE TABLE \"public\".\"matches\" (\n  \"key\" text NOT NULL,\n  \"scoreA\" int4,\n  \"scoreB\" int4,\n  \"startsAt\" timestamptz,\n  \"status\" text DEFAULT 'UPCOMING' NOT NULL,\n  \"tournamentId\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"tournamentId\", \"key\"),\n  CONSTRAINT \"matches_status_check_db8f0624\" CHECK (\"status\" IN ('UPCOMING', 'LIVE', 'FINISHED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"matches\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"matches\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"matches\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.staff_members",
+    "label": "Create table \"staff_members\"",
+    "summary": "Creates table \"staff_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "staff_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"staff_members\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"staff_members\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"staff_members\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"staff_members\"",
+        "sql": "CREATE TABLE \"public\".\"staff_members\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"role\" text NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"userId\"),\n  CONSTRAINT \"staff_members_role_check_2fefdc8d\" CHECK (\"role\" IN ('OWNER', 'ORGANIZER'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"staff_members\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"staff_members\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"staff_members\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.team_members",
+    "label": "Create table \"team_members\"",
+    "summary": "Creates table \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"team_members\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_members\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"team_members\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"team_members\"",
+        "sql": "CREATE TABLE \"public\".\"team_members\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"id\" text NOT NULL,\n  \"isCaptain\" bool DEFAULT false NOT NULL,\n  \"isManager\" bool DEFAULT false NOT NULL,\n  \"lineup\" text DEFAULT 'NONE' NOT NULL,\n  \"position\" int4,\n  \"status\" text DEFAULT 'PENDING' NOT NULL,\n  \"teamId\" text NOT NULL,\n  \"tournamentId\" text NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"team_members_captain_player_03bc770d\" CHECK (NOT \"isCaptain\" OR \"lineup\" = 'PLAYER'),\n  CONSTRAINT \"team_members_lineup_check_84f49323\" CHECK (\"lineup\" IN ('PLAYER', 'COACH', 'NONE')),\n  CONSTRAINT \"team_members_position_b83ffe2a\" CHECK ((\"lineup\" = 'PLAYER') = (\"position\" IS NOT NULL) AND (\"position\" IS NULL OR \"position\" BETWEEN 1 AND 5)),\n  CONSTRAINT \"team_members_status_check_eb620b9f\" CHECK (\"status\" IN ('PENDING', 'ACTIVE'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"team_members\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"team_members\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"team_members\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.teams",
+    "label": "Create table \"teams\"",
+    "summary": "Creates table \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"teams\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"teams\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"teams\"",
+        "sql": "CREATE TABLE \"public\".\"teams\" (\n  \"communityId\" text NOT NULL,\n  \"createdAt\" timestamptz NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"seed\" int4,\n  \"slug\" text NOT NULL,\n  \"tag\" text NOT NULL,\n  \"tournamentId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"teams\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"teams\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"teams\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.tournaments",
+    "label": "Create table \"tournaments\"",
+    "summary": "Creates table \"tournaments\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "tournaments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"tournaments\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"tournaments\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"tournaments\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"tournaments\"",
+        "sql": "CREATE TABLE \"public\".\"tournaments\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"rankLimit\" int4,\n  \"rosterDeadline\" timestamptz,\n  \"slug\" text NOT NULL,\n  \"status\" text DEFAULT 'DRAFT' NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"tournaments_status_check_6181c7cd\" CHECK (\"status\" IN ('DRAFT', 'REGISTRATION', 'LOCKED', 'LIVE', 'FINISHED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"tournaments\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"tournaments\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"tournaments\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.users",
+    "label": "Create table \"users\"",
+    "summary": "Creates table \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"users\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"users\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"users\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"users\"",
+        "sql": "CREATE TABLE \"public\".\"users\" (\n  \"avatarUrl\" text,\n  \"createdAt\" timestamptz NOT NULL,\n  \"discordId\" text NOT NULL,\n  \"displayName\" text,\n  \"id\" text NOT NULL,\n  \"rankCheckedAt\" timestamptz,\n  \"rankTier\" int4,\n  \"steamAvatarUrl\" text,\n  \"steamId\" text,\n  \"steamName\" text,\n  \"steamProfileUrl\" text,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"username\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"users\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"users\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"users\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "unique.communities.communities_guildId_key",
+    "label": "Add unique constraint on \"communities\" (guildId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "communities_guildId_key",
+        "table": "communities"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"communities_guildId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "communities_guildId_key",
+          "public",
+          "\"public\".\"communities\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"communities_guildId_key\" on \"communities\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"communities_guildId_key\"",
+        "sql": "ALTER TABLE \"public\".\"communities\" ADD CONSTRAINT \"communities_guildId_key\" UNIQUE (\"guildId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"communities_guildId_key\" exists on (guildId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "communities_guildId_key",
+          "public",
+          "\"public\".\"communities\"",
+          "u",
+          "[\"guildId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.invites.invites_tokenHash_key",
+    "label": "Add unique constraint on \"invites\" (tokenHash)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "invites_tokenHash_key",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"invites_tokenHash_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invites_tokenHash_key",
+          "public",
+          "\"public\".\"invites\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"invites_tokenHash_key\" on \"invites\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"invites_tokenHash_key\"",
+        "sql": "ALTER TABLE \"public\".\"invites\" ADD CONSTRAINT \"invites_tokenHash_key\" UNIQUE (\"tokenHash\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"invites_tokenHash_key\" exists on (tokenHash)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "invites_tokenHash_key",
+          "public",
+          "\"public\".\"invites\"",
+          "u",
+          "[\"tokenHash\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.team_members.team_members_tournamentId_userId_key",
+    "label": "Add unique constraint on \"team_members\" (tournamentId, userId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "team_members_tournamentId_userId_key",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"team_members_tournamentId_userId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_members_tournamentId_userId_key",
+          "public",
+          "\"public\".\"team_members\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"team_members_tournamentId_userId_key\" on \"team_members\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"team_members_tournamentId_userId_key\"",
+        "sql": "ALTER TABLE \"public\".\"team_members\" ADD CONSTRAINT \"team_members_tournamentId_userId_key\" UNIQUE (\"tournamentId\", \"userId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"team_members_tournamentId_userId_key\" exists on (tournamentId, userId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "team_members_tournamentId_userId_key",
+          "public",
+          "\"public\".\"team_members\"",
+          "u",
+          "[\"tournamentId\",\"userId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.teams.teams_id_tournamentId_key",
+    "label": "Add unique constraint on \"teams\" (id, tournamentId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "teams_id_tournamentId_key",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"teams_id_tournamentId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_id_tournamentId_key",
+          "public",
+          "\"public\".\"teams\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"teams_id_tournamentId_key\" on \"teams\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"teams_id_tournamentId_key\"",
+        "sql": "ALTER TABLE \"public\".\"teams\" ADD CONSTRAINT \"teams_id_tournamentId_key\" UNIQUE (\"id\", \"tournamentId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"teams_id_tournamentId_key\" exists on (id, tournamentId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "teams_id_tournamentId_key",
+          "public",
+          "\"public\".\"teams\"",
+          "u",
+          "[\"id\",\"tournamentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.teams.teams_tournamentId_communityId_key",
+    "label": "Add unique constraint on \"teams\" (tournamentId, communityId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "teams_tournamentId_communityId_key",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"teams_tournamentId_communityId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_tournamentId_communityId_key",
+          "public",
+          "\"public\".\"teams\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"teams_tournamentId_communityId_key\" on \"teams\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"teams_tournamentId_communityId_key\"",
+        "sql": "ALTER TABLE \"public\".\"teams\" ADD CONSTRAINT \"teams_tournamentId_communityId_key\" UNIQUE (\"tournamentId\", \"communityId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"teams_tournamentId_communityId_key\" exists on (tournamentId, communityId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "teams_tournamentId_communityId_key",
+          "public",
+          "\"public\".\"teams\"",
+          "u",
+          "[\"tournamentId\",\"communityId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.teams.teams_tournamentId_slug_key",
+    "label": "Add unique constraint on \"teams\" (tournamentId, slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "teams_tournamentId_slug_key",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"teams_tournamentId_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_tournamentId_slug_key",
+          "public",
+          "\"public\".\"teams\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"teams_tournamentId_slug_key\" on \"teams\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"teams_tournamentId_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"teams\" ADD CONSTRAINT \"teams_tournamentId_slug_key\" UNIQUE (\"tournamentId\", \"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"teams_tournamentId_slug_key\" exists on (tournamentId, slug)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "teams_tournamentId_slug_key",
+          "public",
+          "\"public\".\"teams\"",
+          "u",
+          "[\"tournamentId\",\"slug\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.teams.teams_tournamentId_seed_key",
+    "label": "Add unique constraint on \"teams\" (tournamentId, seed)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "teams_tournamentId_seed_key",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"teams_tournamentId_seed_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_tournamentId_seed_key",
+          "public",
+          "\"public\".\"teams\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"teams_tournamentId_seed_key\" on \"teams\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"teams_tournamentId_seed_key\"",
+        "sql": "ALTER TABLE \"public\".\"teams\" ADD CONSTRAINT \"teams_tournamentId_seed_key\" UNIQUE (\"tournamentId\", \"seed\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"teams_tournamentId_seed_key\" exists on (tournamentId, seed)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "teams_tournamentId_seed_key",
+          "public",
+          "\"public\".\"teams\"",
+          "u",
+          "[\"tournamentId\",\"seed\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.tournaments.tournaments_slug_key",
+    "label": "Add unique constraint on \"tournaments\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "tournaments_slug_key",
+        "table": "tournaments"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"tournaments_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "tournaments_slug_key",
+          "public",
+          "\"public\".\"tournaments\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"tournaments_slug_key\" on \"tournaments\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"tournaments_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"tournaments\" ADD CONSTRAINT \"tournaments_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"tournaments_slug_key\" exists on (slug)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "tournaments_slug_key",
+          "public",
+          "\"public\".\"tournaments\"",
+          "u",
+          "[\"slug\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.users.users_discordId_key",
+    "label": "Add unique constraint on \"users\" (discordId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "users_discordId_key",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"users_discordId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "users_discordId_key",
+          "public",
+          "\"public\".\"users\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"users_discordId_key\" on \"users\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"users_discordId_key\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD CONSTRAINT \"users_discordId_key\" UNIQUE (\"discordId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"users_discordId_key\" exists on (discordId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "users_discordId_key",
+          "public",
+          "\"public\".\"users\"",
+          "u",
+          "[\"discordId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.users.users_steamId_key",
+    "label": "Add unique constraint on \"users\" (steamId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "users_steamId_key",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"users_steamId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "users_steamId_key",
+          "public",
+          "\"public\".\"users\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"users_steamId_key\" on \"users\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"users_steamId_key\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD CONSTRAINT \"users_steamId_key\" UNIQUE (\"steamId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"users_steamId_key\" exists on (steamId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "users_steamId_key",
+          "public",
+          "\"public\".\"users\"",
+          "u",
+          "[\"steamId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.invites.invites_createdById_idx_8bf640ed",
+    "label": "Create index \"invites_createdById_idx_8bf640ed\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "invites_createdById_idx_8bf640ed",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"invites_createdById_idx_8bf640ed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"invites_createdById_idx_8bf640ed\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"invites_createdById_idx_8bf640ed\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"invites_createdById_idx_8bf640ed\"",
+        "sql": "CREATE INDEX \"invites_createdById_idx_8bf640ed\" ON \"public\".\"invites\" (\"createdById\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"invites_createdById_idx_8bf640ed\" exists on \"invites\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"invites_createdById_idx_8bf640ed\"",
+          "i",
+          "I",
+          "\"public\".\"invites\"",
+          "btree",
+          "[\"createdById\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.invites.invites_teamId_idx_f2b72ab3",
+    "label": "Create index \"invites_teamId_idx_f2b72ab3\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "invites_teamId_idx_f2b72ab3",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"invites_teamId_idx_f2b72ab3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"invites_teamId_idx_f2b72ab3\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"invites_teamId_idx_f2b72ab3\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"invites_teamId_idx_f2b72ab3\"",
+        "sql": "CREATE INDEX \"invites_teamId_idx_f2b72ab3\" ON \"public\".\"invites\" (\"teamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"invites_teamId_idx_f2b72ab3\" exists on \"invites\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"invites_teamId_idx_f2b72ab3\"",
+          "i",
+          "I",
+          "\"public\".\"invites\"",
+          "btree",
+          "[\"teamId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.invites.invites_tournamentId_idx_d0bd97a6",
+    "label": "Create index \"invites_tournamentId_idx_d0bd97a6\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "invites_tournamentId_idx_d0bd97a6",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"invites_tournamentId_idx_d0bd97a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"invites_tournamentId_idx_d0bd97a6\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"invites_tournamentId_idx_d0bd97a6\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"invites_tournamentId_idx_d0bd97a6\"",
+        "sql": "CREATE INDEX \"invites_tournamentId_idx_d0bd97a6\" ON \"public\".\"invites\" (\"tournamentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"invites_tournamentId_idx_d0bd97a6\" exists on \"invites\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"invites_tournamentId_idx_d0bd97a6\"",
+          "i",
+          "I",
+          "\"public\".\"invites\"",
+          "btree",
+          "[\"tournamentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.invites.invites_usedById_idx_3111f7a3",
+    "label": "Create index \"invites_usedById_idx_3111f7a3\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "invites_usedById_idx_3111f7a3",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"invites_usedById_idx_3111f7a3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"invites_usedById_idx_3111f7a3\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"invites_usedById_idx_3111f7a3\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"invites_usedById_idx_3111f7a3\"",
+        "sql": "CREATE INDEX \"invites_usedById_idx_3111f7a3\" ON \"public\".\"invites\" (\"usedById\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"invites_usedById_idx_3111f7a3\" exists on \"invites\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"invites_usedById_idx_3111f7a3\"",
+          "i",
+          "I",
+          "\"public\".\"invites\"",
+          "btree",
+          "[\"usedById\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.matches.matches_tournamentId_idx_d0bd97a6",
+    "label": "Create index \"matches_tournamentId_idx_d0bd97a6\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "matches_tournamentId_idx_d0bd97a6",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"matches_tournamentId_idx_d0bd97a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"matches_tournamentId_idx_d0bd97a6\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"matches_tournamentId_idx_d0bd97a6\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"matches_tournamentId_idx_d0bd97a6\"",
+        "sql": "CREATE INDEX \"matches_tournamentId_idx_d0bd97a6\" ON \"public\".\"matches\" (\"tournamentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"matches_tournamentId_idx_d0bd97a6\" exists on \"matches\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"matches_tournamentId_idx_d0bd97a6\"",
+          "i",
+          "I",
+          "\"public\".\"matches\"",
+          "btree",
+          "[\"tournamentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.team_members.team_members_captain_c9449c99",
+    "label": "Create index \"team_members_captain_c9449c99\" on \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "team_members_captain_c9449c99",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"team_members_captain_c9449c99\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_captain_c9449c99\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"team_members_captain_c9449c99\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"team_members_captain_c9449c99\"",
+        "sql": "CREATE UNIQUE INDEX \"team_members_captain_c9449c99\" ON \"public\".\"team_members\" (\"teamId\") WHERE (\"isCaptain\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"team_members_captain_c9449c99\" exists on \"team_members\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_captain_c9449c99\"",
+          "i",
+          "I",
+          "\"public\".\"team_members\"",
+          "btree",
+          "[\"teamId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.team_members.team_members_slot_08ccec31",
+    "label": "Create index \"team_members_slot_08ccec31\" on \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "team_members_slot_08ccec31",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"team_members_slot_08ccec31\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_slot_08ccec31\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"team_members_slot_08ccec31\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"team_members_slot_08ccec31\"",
+        "sql": "CREATE UNIQUE INDEX \"team_members_slot_08ccec31\" ON \"public\".\"team_members\" (\"teamId\", \"position\") WHERE (\"status\" = 'ACTIVE' AND \"lineup\" = 'PLAYER')",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"team_members_slot_08ccec31\" exists on \"team_members\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND \"i\".\"indisunique\" AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_slot_08ccec31\"",
+          "i",
+          "I",
+          "\"public\".\"team_members\"",
+          "btree",
+          "[\"teamId\",\"position\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.team_members.team_members_teamId_idx_f2b72ab3",
+    "label": "Create index \"team_members_teamId_idx_f2b72ab3\" on \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "team_members_teamId_idx_f2b72ab3",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"team_members_teamId_idx_f2b72ab3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_teamId_idx_f2b72ab3\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"team_members_teamId_idx_f2b72ab3\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"team_members_teamId_idx_f2b72ab3\"",
+        "sql": "CREATE INDEX \"team_members_teamId_idx_f2b72ab3\" ON \"public\".\"team_members\" (\"teamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"team_members_teamId_idx_f2b72ab3\" exists on \"team_members\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_teamId_idx_f2b72ab3\"",
+          "i",
+          "I",
+          "\"public\".\"team_members\"",
+          "btree",
+          "[\"teamId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.team_members.team_members_teamId_tournamentId_idx_68021069",
+    "label": "Create index \"team_members_teamId_tournamentId_idx_68021069\" on \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "team_members_teamId_tournamentId_idx_68021069",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"team_members_teamId_tournamentId_idx_68021069\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_teamId_tournamentId_idx_68021069\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"team_members_teamId_tournamentId_idx_68021069\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"team_members_teamId_tournamentId_idx_68021069\"",
+        "sql": "CREATE INDEX \"team_members_teamId_tournamentId_idx_68021069\" ON \"public\".\"team_members\" (\"teamId\", \"tournamentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"team_members_teamId_tournamentId_idx_68021069\" exists on \"team_members\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_teamId_tournamentId_idx_68021069\"",
+          "i",
+          "I",
+          "\"public\".\"team_members\"",
+          "btree",
+          "[\"teamId\",\"tournamentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.team_members.team_members_userId_idx_a489d58a",
+    "label": "Create index \"team_members_userId_idx_a489d58a\" on \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "team_members_userId_idx_a489d58a",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"team_members_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_userId_idx_a489d58a\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"team_members_userId_idx_a489d58a\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"team_members_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"team_members_userId_idx_a489d58a\" ON \"public\".\"team_members\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"team_members_userId_idx_a489d58a\" exists on \"team_members\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"team_members_userId_idx_a489d58a\"",
+          "i",
+          "I",
+          "\"public\".\"team_members\"",
+          "btree",
+          "[\"userId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.teams.teams_communityId_idx_e2c72225",
+    "label": "Create index \"teams_communityId_idx_e2c72225\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "teams_communityId_idx_e2c72225",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"teams_communityId_idx_e2c72225\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams_communityId_idx_e2c72225\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"teams_communityId_idx_e2c72225\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"teams_communityId_idx_e2c72225\"",
+        "sql": "CREATE INDEX \"teams_communityId_idx_e2c72225\" ON \"public\".\"teams\" (\"communityId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"teams_communityId_idx_e2c72225\" exists on \"teams\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"teams_communityId_idx_e2c72225\"",
+          "i",
+          "I",
+          "\"public\".\"teams\"",
+          "btree",
+          "[\"communityId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.teams.teams_tournamentId_idx_d0bd97a6",
+    "label": "Create index \"teams_tournamentId_idx_d0bd97a6\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "teams_tournamentId_idx_d0bd97a6",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"teams_tournamentId_idx_d0bd97a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teams_tournamentId_idx_d0bd97a6\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"teams_tournamentId_idx_d0bd97a6\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"teams_tournamentId_idx_d0bd97a6\"",
+        "sql": "CREATE INDEX \"teams_tournamentId_idx_d0bd97a6\" ON \"public\".\"teams\" (\"tournamentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"teams_tournamentId_idx_d0bd97a6\" exists on \"teams\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"teams_tournamentId_idx_d0bd97a6\"",
+          "i",
+          "I",
+          "\"public\".\"teams\"",
+          "btree",
+          "[\"tournamentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.invites.invites_tournamentId_fkey",
+    "label": "Add foreign key \"invites_tournamentId_fkey\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "invites_tournamentId_fkey",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"invites_tournamentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invites_tournamentId_fkey",
+          "public",
+          "\"public\".\"invites\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"invites_tournamentId_fkey\" on \"invites\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"invites_tournamentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"invites\"\nADD CONSTRAINT \"invites_tournamentId_fkey\"\nFOREIGN KEY (\"tournamentId\")\nREFERENCES \"public\".\"tournaments\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"invites_tournamentId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "invites_tournamentId_fkey",
+          "public",
+          "\"public\".\"invites\"",
+          "f",
+          "[\"tournamentId\"]",
+          "\"public\".\"tournaments\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.invites.invites_teamId_fkey",
+    "label": "Add foreign key \"invites_teamId_fkey\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "invites_teamId_fkey",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"invites_teamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invites_teamId_fkey",
+          "public",
+          "\"public\".\"invites\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"invites_teamId_fkey\" on \"invites\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"invites_teamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"invites\"\nADD CONSTRAINT \"invites_teamId_fkey\"\nFOREIGN KEY (\"teamId\")\nREFERENCES \"public\".\"teams\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"invites_teamId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "invites_teamId_fkey",
+          "public",
+          "\"public\".\"invites\"",
+          "f",
+          "[\"teamId\"]",
+          "\"public\".\"teams\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.invites.invites_createdById_fkey",
+    "label": "Add foreign key \"invites_createdById_fkey\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "invites_createdById_fkey",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"invites_createdById_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invites_createdById_fkey",
+          "public",
+          "\"public\".\"invites\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"invites_createdById_fkey\" on \"invites\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"invites_createdById_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"invites\"\nADD CONSTRAINT \"invites_createdById_fkey\"\nFOREIGN KEY (\"createdById\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"invites_createdById_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "invites_createdById_fkey",
+          "public",
+          "\"public\".\"invites\"",
+          "f",
+          "[\"createdById\"]",
+          "\"public\".\"users\"",
+          "[\"id\"]",
+          "r",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.invites.invites_usedById_fkey",
+    "label": "Add foreign key \"invites_usedById_fkey\" on \"invites\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "invites_usedById_fkey",
+        "table": "invites"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"invites_usedById_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invites_usedById_fkey",
+          "public",
+          "\"public\".\"invites\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"invites_usedById_fkey\" on \"invites\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"invites_usedById_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"invites\"\nADD CONSTRAINT \"invites_usedById_fkey\"\nFOREIGN KEY (\"usedById\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE SET NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"invites_usedById_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "invites_usedById_fkey",
+          "public",
+          "\"public\".\"invites\"",
+          "f",
+          "[\"usedById\"]",
+          "\"public\".\"users\"",
+          "[\"id\"]",
+          "n",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.matches.matches_tournamentId_fkey",
+    "label": "Add foreign key \"matches_tournamentId_fkey\" on \"matches\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "matches_tournamentId_fkey",
+        "table": "matches"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"matches_tournamentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "matches_tournamentId_fkey",
+          "public",
+          "\"public\".\"matches\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"matches_tournamentId_fkey\" on \"matches\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"matches_tournamentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"matches\"\nADD CONSTRAINT \"matches_tournamentId_fkey\"\nFOREIGN KEY (\"tournamentId\")\nREFERENCES \"public\".\"tournaments\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"matches_tournamentId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "matches_tournamentId_fkey",
+          "public",
+          "\"public\".\"matches\"",
+          "f",
+          "[\"tournamentId\"]",
+          "\"public\".\"tournaments\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.staff_members.staff_members_userId_fkey",
+    "label": "Add foreign key \"staff_members_userId_fkey\" on \"staff_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "staff_members_userId_fkey",
+        "table": "staff_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"staff_members_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "staff_members_userId_fkey",
+          "public",
+          "\"public\".\"staff_members\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"staff_members_userId_fkey\" on \"staff_members\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"staff_members_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"staff_members\"\nADD CONSTRAINT \"staff_members_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"staff_members_userId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "staff_members_userId_fkey",
+          "public",
+          "\"public\".\"staff_members\"",
+          "f",
+          "[\"userId\"]",
+          "\"public\".\"users\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.team_members.team_members_teamId_tournamentId_fkey",
+    "label": "Add foreign key \"team_members_teamId_tournamentId_fkey\" on \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "team_members_teamId_tournamentId_fkey",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"team_members_teamId_tournamentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_members_teamId_tournamentId_fkey",
+          "public",
+          "\"public\".\"team_members\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"team_members_teamId_tournamentId_fkey\" on \"team_members\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"team_members_teamId_tournamentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"team_members\"\nADD CONSTRAINT \"team_members_teamId_tournamentId_fkey\"\nFOREIGN KEY (\"teamId\", \"tournamentId\")\nREFERENCES \"public\".\"teams\" (\"id\", \"tournamentId\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"team_members_teamId_tournamentId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "team_members_teamId_tournamentId_fkey",
+          "public",
+          "\"public\".\"team_members\"",
+          "f",
+          "[\"teamId\",\"tournamentId\"]",
+          "\"public\".\"teams\"",
+          "[\"id\",\"tournamentId\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.team_members.team_members_userId_fkey",
+    "label": "Add foreign key \"team_members_userId_fkey\" on \"team_members\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "team_members_userId_fkey",
+        "table": "team_members"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"team_members_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "team_members_userId_fkey",
+          "public",
+          "\"public\".\"team_members\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"team_members_userId_fkey\" on \"team_members\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"team_members_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"team_members\"\nADD CONSTRAINT \"team_members_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"users\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"team_members_userId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "team_members_userId_fkey",
+          "public",
+          "\"public\".\"team_members\"",
+          "f",
+          "[\"userId\"]",
+          "\"public\".\"users\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.teams.teams_tournamentId_fkey",
+    "label": "Add foreign key \"teams_tournamentId_fkey\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "teams_tournamentId_fkey",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"teams_tournamentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_tournamentId_fkey",
+          "public",
+          "\"public\".\"teams\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"teams_tournamentId_fkey\" on \"teams\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"teams_tournamentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"teams\"\nADD CONSTRAINT \"teams_tournamentId_fkey\"\nFOREIGN KEY (\"tournamentId\")\nREFERENCES \"public\".\"tournaments\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"teams_tournamentId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "teams_tournamentId_fkey",
+          "public",
+          "\"public\".\"teams\"",
+          "f",
+          "[\"tournamentId\"]",
+          "\"public\".\"tournaments\"",
+          "[\"id\"]",
+          "r",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.teams.teams_communityId_fkey",
+    "label": "Add foreign key \"teams_communityId_fkey\" on \"teams\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "teams_communityId_fkey",
+        "table": "teams"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"teams_communityId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teams_communityId_fkey",
+          "public",
+          "\"public\".\"teams\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"teams_communityId_fkey\" on \"teams\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"teams_communityId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"teams\"\nADD CONSTRAINT \"teams_communityId_fkey\"\nFOREIGN KEY (\"communityId\")\nREFERENCES \"public\".\"communities\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"teams_communityId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "teams_communityId_fkey",
+          "public",
+          "\"public\".\"teams\"",
+          "f",
+          "[\"communityId\"]",
+          "\"public\".\"communities\"",
+          "[\"id\"]",
+          "r",
+          "a"
+        ]
+      }
+    ]
+  }
+]

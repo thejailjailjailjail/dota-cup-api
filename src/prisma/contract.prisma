@@ -16,8 +16,10 @@ model User {
   rankTier        Int?
   rankCheckedAt   DateTime?
 
-  staff       StaffMember?
-  memberships TeamMember[]
+  staff          StaffMember?
+  memberships    TeamMember[]
+  invitesCreated Invite[]     @relation("InviteCreatedBy")
+  invitesUsed    Invite[]     @relation("InviteUsedBy")
 
   createdAt DateTime @onCreate(now())
   updatedAt DateTime @onCreate(now()) @onUpdate(now())
@@ -45,6 +47,7 @@ model Tournament {
 
   teams   Team[]
   invites Invite[]
+  matches Match[]
 
   createdAt DateTime @onCreate(now())
 
@@ -86,6 +89,7 @@ model Team {
   @@unique([tournamentId, communityId])
   @@unique([tournamentId, slug])
   @@unique([tournamentId, seed])
+  @@index([communityId])
   @@map("teams")
 }
 
@@ -105,8 +109,14 @@ model TeamMember {
 
   createdAt DateTime @onCreate(now())
 
+  @@index([teamId, position], unique: true, where: sql`"status" = 'ACTIVE' AND "lineup" = 'PLAYER'`, name: "team_members_slot")
+  @@index([teamId], unique: true, where: sql`"isCaptain"`, name: "team_members_captain")
+  @@check(expression: sql`("lineup" = 'PLAYER') = ("position" IS NOT NULL) AND ("position" IS NULL OR "position" BETWEEN 1 AND 5)`, name: "team_members_position")
+  @@check(expression: sql`NOT "isCaptain" OR "lineup" = 'PLAYER'`, name: "team_members_captain_player")
+
   @@unique([tournamentId, userId])
   @@index([teamId])
+  @@index([userId])
   @@map("team_members")
 }
 
@@ -118,28 +128,40 @@ model Invite {
   tournament   Tournament? @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   teamId       String?
   team         Team?       @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  createdById  String
-  expiresAt    DateTime
-  maxUses      Int?
-  uses         Int         @default(0)
-  revokedAt    DateTime?
+  staffRole    StaffRole?
+  guildId      String?
+
+  createdById String
+  createdBy   User      @relation("InviteCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  usedById    String?
+  usedBy      User?     @relation("InviteUsedBy", fields: [usedById], references: [id], onDelete: SetNull)
+  usedAt      DateTime?
+
+  expiresAt DateTime
+  maxUses   Int?
+  uses      Int       @default(0)
+  revokedAt DateTime?
 
   createdAt DateTime @onCreate(now())
 
+  @@index([tournamentId])
+  @@index([teamId])
   @@map("invites")
 }
 
 model Match {
-  id     String      @id
-  scoreA Int?
-  scoreB Int?
-  status MatchStatus @default(UPCOMING)
+  tournamentId String
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  key          String
+  scoreA       Int?
+  scoreB       Int?
+  status       MatchStatus @default(UPCOMING)
+  startsAt     DateTime?
 
-  tournamentId String?
-  tournament   Tournament? @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @onCreate(now()) @onUpdate(now())
 
-  startsdAt DateTime?
-  updatedAt DateTime  @onCreate(now()) @onUpdate(now())
+  @@id([tournamentId, key])
+  @@map("matches")
 }
 
 // -=-=- ENUMS -=-=-

@@ -12,6 +12,10 @@
       "model": "Invite",
       "namespace": "public"
     },
+    "matches": {
+      "model": "Match",
+      "namespace": "public"
+    },
     "staff_members": {
       "model": "StaffMember",
       "namespace": "public"
@@ -68,6 +72,23 @@
               {
                 "name": "NONE",
                 "value": "NONE"
+              }
+            ]
+          },
+          "MatchStatus": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "UPCOMING",
+                "value": "UPCOMING"
+              },
+              {
+                "name": "LIVE",
+                "value": "LIVE"
+              },
+              {
+                "name": "FINISHED",
+                "value": "FINISHED"
               }
             ]
           },
@@ -234,6 +255,13 @@
                   "kind": "scalar"
                 }
               },
+              "guildId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -268,6 +296,19 @@
                   "kind": "scalar"
                 }
               },
+              "staffRole": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "StaffRole",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
               "teamId": {
                 "nullable": true,
                 "type": {
@@ -289,6 +330,20 @@
                   "kind": "scalar"
                 }
               },
+              "usedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "usedById": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "uses": {
                 "nullable": false,
                 "type": {
@@ -298,6 +353,22 @@
               }
             },
             "relations": {
+              "createdBy": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "createdById"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
               "team": {
                 "cardinality": "N:1",
                 "nullable": true,
@@ -329,6 +400,22 @@
                   "model": "Tournament",
                   "namespace": "public"
                 }
+              },
+              "usedBy": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "usedById"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -342,6 +429,9 @@
                 "expiresAt": {
                   "column": "expiresAt"
                 },
+                "guildId": {
+                  "column": "guildId"
+                },
                 "id": {
                   "column": "id"
                 },
@@ -354,6 +444,9 @@
                 "revokedAt": {
                   "column": "revokedAt"
                 },
+                "staffRole": {
+                  "column": "staffRole"
+                },
                 "teamId": {
                   "column": "teamId"
                 },
@@ -363,12 +456,122 @@
                 "tournamentId": {
                   "column": "tournamentId"
                 },
+                "usedAt": {
+                  "column": "usedAt"
+                },
+                "usedById": {
+                  "column": "usedById"
+                },
                 "uses": {
                   "column": "uses"
                 }
               },
               "namespaceId": "public",
               "table": "invites"
+            }
+          },
+          "Match": {
+            "fields": {
+              "key": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "scoreA": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "scoreB": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "startsAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "MatchStatus",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "tournamentId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "tournament": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "tournamentId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Tournament",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "key": {
+                  "column": "key"
+                },
+                "scoreA": {
+                  "column": "scoreA"
+                },
+                "scoreB": {
+                  "column": "scoreB"
+                },
+                "startsAt": {
+                  "column": "startsAt"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "tournamentId": {
+                  "column": "tournamentId"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "matches"
             }
           },
           "StaffMember": {
@@ -823,6 +1026,21 @@
                   "namespace": "public"
                 }
               },
+              "matches": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "tournamentId"
+                  ]
+                },
+                "to": {
+                  "model": "Match",
+                  "namespace": "public"
+                }
+              },
               "teams": {
                 "cardinality": "1:N",
                 "on": {
@@ -962,6 +1180,36 @@
               }
             },
             "relations": {
+              "invitesCreated": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "createdById"
+                  ]
+                },
+                "to": {
+                  "model": "Invite",
+                  "namespace": "public"
+                }
+              },
+              "invitesUsed": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "usedById"
+                  ]
+                },
+                "to": {
+                  "model": "Invite",
+                  "namespace": "public"
+                }
+              },
               "memberships": {
                 "cardinality": "1:N",
                 "on": {
@@ -1103,6 +1351,11 @@
                   "expression": "\"kind\" IN ('STAFF', 'COMMUNITY', 'TEAM')",
                   "name": "invites_kind_check_a9ed639c",
                   "prefix": "invites_kind_check"
+                },
+                {
+                  "expression": "\"staffRole\" IN ('OWNER', 'ORGANIZER')",
+                  "name": "invites_staffRole_check_0b11325e",
+                  "prefix": "invites_staffRole_check"
                 }
               ],
               "columns": {
@@ -1120,6 +1373,11 @@
                   "codecId": "pg/timestamptz-temporal@1",
                   "dataType": "pg/timestamptz",
                   "nullable": false
+                },
+                "guildId": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
                 },
                 "id": {
                   "codecId": "pg/text@1",
@@ -1147,6 +1405,17 @@
                   "dataType": "pg/timestamptz",
                   "nullable": true
                 },
+                "staffRole": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "StaffRole",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
                 "teamId": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -1158,6 +1427,16 @@
                   "nullable": false
                 },
                 "tournamentId": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "usedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": true
+                },
+                "usedById": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": true
@@ -1212,9 +1491,57 @@
                     "namespaceId": "public",
                     "tableName": "teams"
                   }
+                },
+                {
+                  "index": {
+                    "name": "invites_createdById_idx_8bf640ed"
+                  },
+                  "onDelete": "restrict",
+                  "source": {
+                    "columns": [
+                      "createdById"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "invites"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                },
+                {
+                  "index": {
+                    "name": "invites_usedById_idx_3111f7a3"
+                  },
+                  "onDelete": "setNull",
+                  "source": {
+                    "columns": [
+                      "usedById"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "invites"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "createdById"
+                  ],
+                  "name": "invites_createdById_idx_8bf640ed",
+                  "prefix": "invites_createdById_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "teamId"
@@ -1230,6 +1557,14 @@
                   "name": "invites_tournamentId_idx_d0bd97a6",
                   "prefix": "invites_tournamentId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "usedById"
+                  ],
+                  "name": "invites_usedById_idx_3111f7a3",
+                  "prefix": "invites_usedById_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -1244,6 +1579,101 @@
                   ]
                 }
               ]
+            },
+            "matches": {
+              "checks": [
+                {
+                  "expression": "\"status\" IN ('UPCOMING', 'LIVE', 'FINISHED')",
+                  "name": "matches_status_check_db8f0624",
+                  "prefix": "matches_status_check"
+                }
+              ],
+              "columns": {
+                "key": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "scoreA": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": true
+                },
+                "scoreB": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": true
+                },
+                "startsAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": true
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "default": {
+                    "kind": "literal",
+                    "value": "UPCOMING"
+                  },
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "MatchStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "tournamentId": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "matches_tournamentId_idx_d0bd97a6"
+                  },
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "tournamentId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "matches"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "tournaments"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "tournamentId"
+                  ],
+                  "name": "matches_tournamentId_idx_d0bd97a6",
+                  "prefix": "matches_tournamentId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "tournamentId",
+                  "key"
+                ]
+              },
+              "uniques": []
             },
             "staff_members": {
               "checks": [
@@ -1309,9 +1739,19 @@
             "team_members": {
               "checks": [
                 {
+                  "expression": "NOT \"isCaptain\" OR \"lineup\" = 'PLAYER'",
+                  "name": "team_members_captain_player_03bc770d",
+                  "prefix": "team_members_captain_player"
+                },
+                {
                   "expression": "\"lineup\" IN ('PLAYER', 'COACH', 'NONE')",
                   "name": "team_members_lineup_check_84f49323",
                   "prefix": "team_members_lineup_check"
+                },
+                {
+                  "expression": "(\"lineup\" = 'PLAYER') = (\"position\" IS NOT NULL) AND (\"position\" IS NULL OR \"position\" BETWEEN 1 AND 5)",
+                  "name": "team_members_position_b83ffe2a",
+                  "prefix": "team_members_position"
                 },
                 {
                   "expression": "\"status\" IN ('PENDING', 'ACTIVE')",
@@ -1444,6 +1884,25 @@
                 }
               ],
               "indexes": [
+                {
+                  "columns": [
+                    "teamId"
+                  ],
+                  "name": "team_members_captain_c9449c99",
+                  "prefix": "team_members_captain",
+                  "unique": true,
+                  "where": "\"isCaptain\""
+                },
+                {
+                  "columns": [
+                    "teamId",
+                    "position"
+                  ],
+                  "name": "team_members_slot_08ccec31",
+                  "prefix": "team_members_slot",
+                  "unique": true,
+                  "where": "\"status\" = 'ACTIVE' AND \"lineup\" = 'PLAYER'"
+                },
                 {
                   "columns": [
                     "teamId"
@@ -1795,6 +2254,14 @@
                 "NONE"
               ]
             },
+            "MatchStatus": {
+              "kind": "valueSet",
+              "values": [
+                "UPCOMING",
+                "LIVE",
+                "FINISHED"
+              ]
+            },
             "MemberStatus": {
               "kind": "valueSet",
               "values": [
@@ -1825,10 +2292,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a43e7dbb9ff14541d8dd8230b2e23ec5d4f4825f552ae8cbc115fb6ecbd0c125"
+    "storageHash": "550afcb10854a130bd8ad4641139e9853f5c098d72dadce4252de885efef2693"
   },
   "execution": {
-    "executionHash": "023952cd341ffcc5b9ea11b9f582267a2cac968702a74c8fb0039ec6e0523523",
+    "executionHash": "d2fda67c6a8ea05308192455a3719b1deb8e5404f5959761ad5f4405bb24f07f",
     "mutations": {
       "defaults": [
         {
@@ -1872,6 +2339,21 @@
           "ref": {
             "entry": "invites",
             "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "instantNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "instantNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "matches",
+            "field": "updatedAt",
             "namespace": "public"
           }
         },

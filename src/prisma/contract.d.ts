@@ -23,9 +23,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'a43e7dbb9ff14541d8dd8230b2e23ec5d4f4825f552ae8cbc115fb6ecbd0c125'>;
+  StorageHashBase<'550afcb10854a130bd8ad4641139e9853f5c098d72dadce4252de885efef2693'>;
 export type ExecutionHash =
-  ExecutionHashBase<'023952cd341ffcc5b9ea11b9f582267a2cac968702a74c8fb0039ec6e0523523'>;
+  ExecutionHashBase<'d2fda67c6a8ea05308192455a3719b1deb8e5404f5959761ad5f4405bb24f07f'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -246,6 +246,16 @@ type FieldTypeOverrides = {
           readonly output: 'STAFF' | 'COMMUNITY' | 'TEAM';
           readonly input: 'STAFF' | 'COMMUNITY' | 'TEAM';
         };
+        readonly staffRole: {
+          readonly output: 'OWNER' | 'ORGANIZER';
+          readonly input: 'OWNER' | 'ORGANIZER';
+        };
+      };
+      readonly Match: {
+        readonly status: {
+          readonly output: 'UPCOMING' | 'LIVE' | 'FINISHED';
+          readonly input: 'UPCOMING' | 'LIVE' | 'FINISHED';
+        };
       };
       readonly StaffMember: {
         readonly role: {
@@ -292,6 +302,16 @@ type ColumnTypeOverrides = {
       readonly kind: {
         readonly output: 'STAFF' | 'COMMUNITY' | 'TEAM';
         readonly input: 'STAFF' | 'COMMUNITY' | 'TEAM';
+      };
+      readonly staffRole: {
+        readonly output: 'OWNER' | 'ORGANIZER';
+        readonly input: 'OWNER' | 'ORGANIZER';
+      };
+    };
+    readonly matches: {
+      readonly status: {
+        readonly output: 'UPCOMING' | 'LIVE' | 'FINISHED';
+        readonly input: 'UPCOMING' | 'LIVE' | 'FINISHED';
       };
     };
     readonly staff_members: {
@@ -348,17 +368,34 @@ export namespace Models {
     createdAt: FieldOutputTypes['public']['Invite']['createdAt'];
     createdById: FieldOutputTypes['public']['Invite']['createdById'];
     expiresAt: FieldOutputTypes['public']['Invite']['expiresAt'];
+    guildId: FieldOutputTypes['public']['Invite']['guildId'];
     id: FieldOutputTypes['public']['Invite']['id'];
     kind: FieldOutputTypes['public']['Invite']['kind'];
     maxUses: FieldOutputTypes['public']['Invite']['maxUses'];
     revokedAt: FieldOutputTypes['public']['Invite']['revokedAt'];
+    staffRole: FieldOutputTypes['public']['Invite']['staffRole'];
     teamId: FieldOutputTypes['public']['Invite']['teamId'];
     tokenHash: FieldOutputTypes['public']['Invite']['tokenHash'];
     tournamentId: FieldOutputTypes['public']['Invite']['tournamentId'];
+    usedAt: FieldOutputTypes['public']['Invite']['usedAt'];
+    usedById: FieldOutputTypes['public']['Invite']['usedById'];
     uses: FieldOutputTypes['public']['Invite']['uses'];
+    createdBy: public_User;
     team: public_Team | null;
     tournament: public_Tournament | null;
-    readonly [RelationKeys]?: 'team' | 'tournament';
+    usedBy: public_User | null;
+    readonly [RelationKeys]?: 'createdBy' | 'team' | 'tournament' | 'usedBy';
+  };
+  export type public_Match = {
+    key: FieldOutputTypes['public']['Match']['key'];
+    scoreA: FieldOutputTypes['public']['Match']['scoreA'];
+    scoreB: FieldOutputTypes['public']['Match']['scoreB'];
+    startsAt: FieldOutputTypes['public']['Match']['startsAt'];
+    status: FieldOutputTypes['public']['Match']['status'];
+    tournamentId: FieldOutputTypes['public']['Match']['tournamentId'];
+    updatedAt: FieldOutputTypes['public']['Match']['updatedAt'];
+    tournament: public_Tournament;
+    readonly [RelationKeys]?: 'tournament';
   };
   export type public_StaffMember = {
     createdAt: FieldOutputTypes['public']['StaffMember']['createdAt'];
@@ -406,8 +443,9 @@ export namespace Models {
     slug: FieldOutputTypes['public']['Tournament']['slug'];
     status: FieldOutputTypes['public']['Tournament']['status'];
     invites: public_Invite[];
+    matches: public_Match[];
     teams: public_Team[];
-    readonly [RelationKeys]?: 'invites' | 'teams';
+    readonly [RelationKeys]?: 'invites' | 'matches' | 'teams';
   };
   export type public_User = {
     avatarUrl: FieldOutputTypes['public']['User']['avatarUrl'];
@@ -423,9 +461,11 @@ export namespace Models {
     steamProfileUrl: FieldOutputTypes['public']['User']['steamProfileUrl'];
     updatedAt: FieldOutputTypes['public']['User']['updatedAt'];
     username: FieldOutputTypes['public']['User']['username'];
+    invitesCreated: public_Invite[];
+    invitesUsed: public_Invite[];
     memberships: public_TeamMember[];
     staff: public_StaffMember | null;
-    readonly [RelationKeys]?: 'memberships' | 'staff';
+    readonly [RelationKeys]?: 'invitesCreated' | 'invitesUsed' | 'memberships' | 'staff';
   };
 }
 
@@ -433,6 +473,7 @@ export declare const models: {
   public: {
     Community: Models.public_Community;
     Invite: Models.public_Invite;
+    Match: Models.public_Match;
     StaffMember: Models.public_StaffMember;
     Team: Models.public_Team;
     TeamMember: Models.public_TeamMember;
@@ -523,6 +564,12 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly guildId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly id: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -547,6 +594,12 @@ type ContractBase = Omit<
                   readonly nullable: true;
                   readonly many: false;
                 };
+                readonly staffRole: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly teamId: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -560,6 +613,18 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly tournamentId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly usedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly usedById: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
@@ -580,6 +645,12 @@ type ContractBase = Omit<
               uniques: readonly [{ readonly columns: readonly ['tokenHash'] }];
               indexes: readonly [
                 {
+                  readonly name: 'invites_createdById_idx_8bf640ed';
+                  readonly prefix: 'invites_createdById_idx';
+                  readonly columns: readonly ['createdById'];
+                  readonly unique: false;
+                },
+                {
                   readonly name: 'invites_teamId_idx_f2b72ab3';
                   readonly prefix: 'invites_teamId_idx';
                   readonly columns: readonly ['teamId'];
@@ -589,6 +660,12 @@ type ContractBase = Omit<
                   readonly name: 'invites_tournamentId_idx_d0bd97a6';
                   readonly prefix: 'invites_tournamentId_idx';
                   readonly columns: readonly ['tournamentId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'invites_usedById_idx_3111f7a3';
+                  readonly prefix: 'invites_usedById_idx';
+                  readonly columns: readonly ['usedById'];
                   readonly unique: false;
                 },
               ];
@@ -614,6 +691,104 @@ type ContractBase = Omit<
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'teams';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'invites';
+                    readonly columns: readonly ['createdById'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'invites';
+                    readonly columns: readonly ['usedById'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly matches: {
+              columns: {
+                readonly key: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly scoreA: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly scoreB: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly startsAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly status: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'UPCOMING'>;
+                  };
+                  readonly many: false;
+                };
+                readonly tournamentId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['tournamentId', 'key'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'matches_tournamentId_idx_d0bd97a6';
+                  readonly prefix: 'matches_tournamentId_idx';
+                  readonly columns: readonly ['tournamentId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'matches';
+                    readonly columns: readonly ['tournamentId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'tournaments';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -740,6 +915,20 @@ type ContractBase = Omit<
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [{ readonly columns: readonly ['tournamentId', 'userId'] }];
               indexes: readonly [
+                {
+                  readonly name: 'team_members_captain_c9449c99';
+                  readonly prefix: 'team_members_captain';
+                  readonly columns: readonly ['teamId'];
+                  readonly where: '"isCaptain"';
+                  readonly unique: true;
+                },
+                {
+                  readonly name: 'team_members_slot_08ccec31';
+                  readonly prefix: 'team_members_slot';
+                  readonly columns: readonly ['teamId', 'position'];
+                  readonly where: '"status" = \'ACTIVE\' AND "lineup" = \'PLAYER\'';
+                  readonly unique: true;
+                },
                 {
                   readonly name: 'team_members_teamId_idx_f2b72ab3';
                   readonly prefix: 'team_members_teamId_idx';
@@ -1038,6 +1227,10 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['PLAYER', 'COACH', 'NONE'];
             };
+            readonly MatchStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['UPCOMING', 'LIVE', 'FINISHED'];
+            };
             readonly MemberStatus: {
               readonly kind: 'valueSet';
               readonly values: readonly ['PENDING', 'ACTIVE'];
@@ -1066,6 +1259,7 @@ type ContractBase = Omit<
       readonly model: 'Community';
     };
     readonly invites: { readonly namespace: 'public' & NamespaceId; readonly model: 'Invite' };
+    readonly matches: { readonly namespace: 'public' & NamespaceId; readonly model: 'Match' };
     readonly staff_members: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'StaffMember';
@@ -1158,6 +1352,10 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
+              readonly guildId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -1177,6 +1375,10 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
+              readonly staffRole: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly teamId: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -1189,12 +1391,32 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly usedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly usedById: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly uses: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
             };
             readonly relations: {
+              readonly createdBy: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['createdById'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
               readonly team: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Team' };
                 readonly cardinality: 'N:1';
@@ -1216,6 +1438,15 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['id'];
                 };
               };
+              readonly usedBy: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['usedById'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'invites';
@@ -1224,14 +1455,83 @@ type ContractBase = Omit<
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly createdById: { readonly column: 'createdById' };
                 readonly expiresAt: { readonly column: 'expiresAt' };
+                readonly guildId: { readonly column: 'guildId' };
                 readonly id: { readonly column: 'id' };
                 readonly kind: { readonly column: 'kind' };
                 readonly maxUses: { readonly column: 'maxUses' };
                 readonly revokedAt: { readonly column: 'revokedAt' };
+                readonly staffRole: { readonly column: 'staffRole' };
                 readonly teamId: { readonly column: 'teamId' };
                 readonly tokenHash: { readonly column: 'tokenHash' };
                 readonly tournamentId: { readonly column: 'tournamentId' };
+                readonly usedAt: { readonly column: 'usedAt' };
+                readonly usedById: { readonly column: 'usedById' };
                 readonly uses: { readonly column: 'uses' };
+              };
+            };
+          };
+          readonly Match: {
+            readonly fields: {
+              readonly key: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly scoreA: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly scoreB: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly startsAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly tournamentId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly tournament: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Tournament';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['tournamentId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'matches';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly key: { readonly column: 'key' };
+                readonly scoreA: { readonly column: 'scoreA' };
+                readonly scoreB: { readonly column: 'scoreB' };
+                readonly startsAt: { readonly column: 'startsAt' };
+                readonly status: { readonly column: 'status' };
+                readonly tournamentId: { readonly column: 'tournamentId' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -1507,6 +1807,17 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['tournamentId'];
                 };
               };
+              readonly matches: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Match';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['tournamentId'];
+                };
+              };
               readonly teams: {
                 readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Team' };
                 readonly cardinality: '1:N';
@@ -1595,6 +1906,28 @@ type ContractBase = Omit<
               };
             };
             readonly relations: {
+              readonly invitesCreated: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Invite';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['createdById'];
+                };
+              };
+              readonly invitesUsed: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Invite';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['usedById'];
+                };
+              };
               readonly memberships: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1657,6 +1990,14 @@ type ContractBase = Omit<
               { readonly name: 'NONE'; readonly value: 'NONE' },
             ];
           };
+          readonly MatchStatus: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'UPCOMING'; readonly value: 'UPCOMING' },
+              { readonly name: 'LIVE'; readonly value: 'LIVE' },
+              { readonly name: 'FINISHED'; readonly value: 'FINISHED' },
+            ];
+          };
           readonly MemberStatus: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
@@ -1692,6 +2033,11 @@ type ContractBase = Omit<
             { readonly name: 'PLAYER'; readonly value: 'PLAYER' },
             { readonly name: 'COACH'; readonly value: 'COACH' },
             { readonly name: 'NONE'; readonly value: 'NONE' },
+          ];
+          readonly MatchStatus: readonly [
+            { readonly name: 'UPCOMING'; readonly value: 'UPCOMING' },
+            { readonly name: 'LIVE'; readonly value: 'LIVE' },
+            { readonly name: 'FINISHED'; readonly value: 'FINISHED' },
           ];
           readonly MemberStatus: readonly [
             { readonly name: 'PENDING'; readonly value: 'PENDING' },
@@ -1773,6 +2119,15 @@ type ContractBase = Omit<
           readonly ref: {
             readonly entry: 'invites';
             readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'instantNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'instantNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'matches';
+            readonly field: 'updatedAt';
             readonly namespace: 'public';
           };
         },
